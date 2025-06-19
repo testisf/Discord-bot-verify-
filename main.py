@@ -89,15 +89,18 @@ async def main():
         return
     
     try:
-        # Start the health check web server
-        await start_web_server()
-        
-        # Start the Discord bot
-        await bot.start(token)
+        # Start both web server and bot concurrently
+        await asyncio.gather(
+            start_web_server(),
+            bot.start(token)
+        )
     except discord.LoginFailure:
         logger.error("Invalid bot token!")
     except Exception as e:
         logger.error(f"Error starting bot: {e}")
+    finally:
+        if not bot.is_closed():
+            await bot.close()
 
 if __name__ == "__main__":
     asyncio.run(main())
