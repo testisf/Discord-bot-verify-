@@ -38,6 +38,12 @@ pip install discord.py aiohttp requests
 python main.py
 ```
 
+## Deployment Commands
+
+For hosting platforms like Render:
+- **Build Command:** `pip install -r requirements.txt`
+- **Start Command:** `python main.py` (note: lowercase 'python')
+
 ## Project Structure
 
 - `main.py` - Bot entry point and initialization
