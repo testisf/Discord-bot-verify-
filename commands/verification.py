@@ -264,59 +264,75 @@ class VerificationCommands(commands.Cog):
     async def reverify(self, interaction: discord.Interaction, roblox_username: str):
         """Handle reverification command"""
         
-        user_id = str(interaction.user.id)
-        
-        # Generate new verification code
-        verification_code = self.generate_verification_code()
-        self.pending_verifications[user_id] = {
-            "code": verification_code,
-            "timestamp": datetime.utcnow(),
-            "guild_id": str(interaction.guild.id) if interaction.guild else "unknown",
-            "roblox_username": roblox_username
-        }
-        
-        # Create embed with instructions
-        embed = discord.Embed(
-            title="🔄 Military Re-verification Process",
-            description="Update your verification and rank:",
-            color=Config.COLORS['info'],
-            timestamp=datetime.utcnow()
-        )
-        
-        embed.add_field(
-            name="Step 1",
-            value="Copy the new verification code below",
-            inline=False
-        )
-        
-        embed.add_field(
-            name="Step 2",
-            value="Update your Roblox profile description",
-            inline=False
-        )
-        
-        embed.add_field(
-            name="Step 3",
-            value=f"Replace old code with: `{verification_code}`",
-            inline=False
-        )
-        
-        embed.add_field(
-            name="Step 4",
-            value="Click the 'Verify' button below",
-            inline=False
-        )
-        
-        embed.add_field(
-            name="📋 Note",
-            value="This will update your nickname with your current rank.",
-            inline=False
-        )
-        
-        # Create view with verify button
-        view = VerificationView(verification_code, interaction.user.id, roblox_username)
-        
-        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+        try:
+            # Respond immediately to prevent timeout
+            await interaction.response.defer(ephemeral=True)
+            
+            user_id = str(interaction.user.id)
+            
+            # Generate new verification code
+            verification_code = self.generate_verification_code()
+            self.pending_verifications[user_id] = {
+                "code": verification_code,
+                "timestamp": datetime.utcnow(),
+                "guild_id": str(interaction.guild.id) if interaction.guild else "unknown",
+                "roblox_username": roblox_username
+            }
+            
+            # Create embed with instructions
+            embed = discord.Embed(
+                title="🔄 Military Re-verification Process",
+                description="Update your verification and rank:",
+                color=Config.COLORS['info'],
+                timestamp=datetime.utcnow()
+            )
+            
+            embed.add_field(
+                name="Step 1",
+                value="Copy the new verification code below",
+                inline=False
+            )
+            
+            embed.add_field(
+                name="Step 2",
+                value="Update your Roblox profile description",
+                inline=False
+            )
+            
+            embed.add_field(
+                name="Step 3",
+                value=f"Replace old code with: `{verification_code}`",
+                inline=False
+            )
+            
+            embed.add_field(
+                name="Step 4",
+                value="Click the 'Verify' button below",
+                inline=False
+            )
+            
+            embed.add_field(
+                name="📋 Note",
+                value="This will update your nickname with your current rank.",
+                inline=False
+            )
+            
+            # Create view with verify button
+            view = VerificationView(verification_code, interaction.user.id, roblox_username)
+            
+            # Use followup since we deferred the response
+            await interaction.followup.send(embed=embed, view=view, ephemeral=True)
+            
+        except Exception as e:
+            # Log the error for debugging
+            print(f"Error in reverify command: {e}")
+            try:
+                if interaction.response.is_done():
+                    await interaction.followup.send(f"❌ An error occurred: {str(e)}", ephemeral=True)
+                else:
+                    await interaction.response.send_message(f"❌ An error occurred: {str(e)}", ephemeral=True)
+            except Exception as follow_error:
+                print(f"Failed to send error message: {follow_error}")
     
     @app_commands.command(name="verification_status", description="Check your verification status")
     async def verification_status(self, interaction: discord.Interaction):
