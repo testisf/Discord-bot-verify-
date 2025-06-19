@@ -37,13 +37,15 @@ class VerificationView(discord.ui.View):
         
         # Check if Roblox cookie is configured
         if not Config.ROBLOX_COOKIE:
-            await interaction.edit_original_response(
-                content="❌ Roblox API is not configured. Please contact an administrator."
+            await interaction.followup.send(
+                "❌ Roblox API is not configured. Please contact an administrator.",
+                ephemeral=True
             )
             return
         
-        await interaction.edit_original_response(
-            content="🔍 Checking your Roblox description for the verification code..."
+        await interaction.followup.send(
+            "🔍 Checking your Roblox description for the verification code...",
+            ephemeral=True
         )
         
         # Use real Roblox API to verify user
@@ -57,13 +59,15 @@ class VerificationView(discord.ui.View):
             
             if not verification_result or not verification_result.get('success'):
                 error_message = verification_result.get('error', 'Unknown error') if verification_result else 'API connection failed'
-                await interaction.edit_original_response(
-                    content=f"❌ Verification failed: {error_message}"
+                await interaction.followup.send(
+                    f"❌ Verification failed: {error_message}",
+                    ephemeral=True
                 )
                 return
         except Exception as e:
-            await interaction.edit_original_response(
-                content=f"❌ API Error: {str(e)}"
+            await interaction.followup.send(
+                f"❌ API Error: {str(e)}",
+                ephemeral=True
             )
             return
         
@@ -147,8 +151,8 @@ class VerificationView(discord.ui.View):
         # Disable the button after verification
         button.disabled = True
         
-        # Send the success message by editing the original response
-        await interaction.edit_original_response(content="", embed=embed, view=self)
+        # Send the success message via followup
+        await interaction.followup.send(embed=embed, ephemeral=True)
     
     async def on_timeout(self):
         if not self.verified:
