@@ -3,6 +3,7 @@ from discord.ext import commands
 import asyncio
 import logging
 import os
+from aiohttp import web
 from config import Config
 from commands.military import MilitaryCommands
 from commands.verification import VerificationCommands
@@ -60,6 +61,23 @@ class MilitaryBot(commands.Bot):
             logger.error(f"Unexpected error: {error}")
             await ctx.send("❌ An unexpected error occurred!")
 
+async def health_check(request):
+    """Health check endpoint for hosting platforms"""
+    return web.json_response({"status": "healthy", "bot": "online"})
+
+async def start_web_server():
+    """Start a simple web server for hosting platform health checks"""
+    app = web.Application()
+    app.router.add_get('/', health_check)
+    app.router.add_get('/health', health_check)
+    
+    port = int(os.environ.get('PORT', 10000))
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', port)
+    await site.start()
+    logger.info(f"Health check server started on port {port}")
+
 async def main():
     """Main function to run the bot"""
     bot = MilitaryBot()
@@ -71,6 +89,10 @@ async def main():
         return
     
     try:
+        # Start the health check web server
+        await start_web_server()
+        
+        # Start the Discord bot
         await bot.start(token)
     except discord.LoginFailure:
         logger.error("Invalid bot token!")
