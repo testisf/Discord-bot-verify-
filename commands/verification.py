@@ -312,7 +312,7 @@ class VerificationCommands(commands.Cog):
         # Create view with verify button
         view = VerificationView(verification_code, interaction.user.id, roblox_username)
         
-        await interaction.followup.send(embed=embed, view=view, ephemeral=True)
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
     
     @app_commands.command(name="verification_status", description="Check your verification status")
     async def verification_status(self, interaction: discord.Interaction):
