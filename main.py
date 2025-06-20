@@ -17,9 +17,8 @@ class MilitaryBot(commands.Bot):
     def __init__(self):
         intents = discord.Intents.default()
         intents.guilds = True
-        # Remove privileged intents that require approval
-        # intents.message_content = True  # Only needed for prefix commands
-        # intents.members = True  # Only needed for member operations
+        # Note: Without privileged intents, member status data is limited
+        # We'll use approximate calculations based on guild statistics
         
         super().__init__(
             command_prefix='!',
