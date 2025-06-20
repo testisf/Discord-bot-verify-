@@ -105,6 +105,16 @@ This is a Discord bot designed for military-themed servers with Roblox group int
 
 ## Changelog
 
+- June 19, 2025: Advanced Ticket Support System and Live Member Counter
+  - Built comprehensive ticket support system with persistent green button interface
+  - Implemented never-expiring ticket buttons with custom IDs for reliability
+  - Added automatic ticket channel creation with proper permissions for support role ID 1385451612650344523
+  - Created live member count display in channel ID 1384582591516119151 with activity percentage
+  - Built advanced server statistics with online/offline ratios and visual activity bars
+  - Added ticket management for support staff with close ticket functionality
+  - Implemented automatic ticket cleanup after 10 seconds of closure confirmation
+  - Created ticket setup command for administrators to deploy system in channel ID 1384585517730893864
+
 - June 19, 2025: Fixed Discord Timeout Issues for Hosting Platforms
   - Fixed /reverify command "application did not respond" error on hosting platforms like Render
   - Added immediate response deferral to prevent Discord 3-second timeout issues
