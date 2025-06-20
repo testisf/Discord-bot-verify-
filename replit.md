@@ -111,6 +111,9 @@ This is a Discord bot designed for military-themed servers with Roblox group int
   - Added automatic ticket channel creation with proper permissions for support role ID 1385451612650344523
   - Created live member count display in channel ID 1384582591516119151 with activity percentage
   - Built advanced server statistics with online/offline ratios and visual activity bars
+  - Fixed member counting accuracy using voice channel activity and estimation algorithms
+  - Added intelligent member status detection that works without privileged intents
+  - Implemented debug information display for data visibility transparency
   - Added ticket management for support staff with close ticket functionality
   - Implemented automatic ticket cleanup after 10 seconds of closure confirmation
   - Created ticket setup command for administrators to deploy system in channel ID 1384585517730893864
