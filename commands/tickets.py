@@ -321,9 +321,51 @@ class TicketCommands(commands.Cog):
             
             guild = channel.guild
             
-            # Calculate member statistics
-            total_members = guild.member_count
-            online_members = len([m for m in guild.members if m.status != discord.Status.offline])
+            # Calculate member statistics using available data
+            total_members = guild.member_count or 0
+            
+            # Count voice channel members for active users
+            voice_members = 0
+            for voice_channel in guild.voice_channels:
+                voice_members += len(voice_channel.members)
+            
+            # Use presence information when available
+            online_count = 0
+            idle_count = 0
+            dnd_count = 0
+            offline_count = 0
+            
+            # Count members we can see (limited without privileged intents)
+            visible_members = 0
+            for member in guild.members:
+                visible_members += 1
+                try:
+                    if member.status == discord.Status.online:
+                        online_count += 1
+                    elif member.status == discord.Status.idle:
+                        idle_count += 1
+                    elif member.status == discord.Status.dnd:
+                        dnd_count += 1
+                    else:
+                        offline_count += 1
+                except:
+                    # Status unavailable, count as offline
+                    offline_count += 1
+            
+            # If we can't see many members, estimate based on voice activity and typical patterns
+            if visible_members < total_members * 0.1:  # Less than 10% visible
+                # Base estimate on voice channel activity and typical Discord usage patterns
+                estimated_online = max(voice_members * 2, total_members * 0.15)  # At least 15% typically online
+                estimated_online = min(estimated_online, total_members * 0.6)  # Cap at 60%
+                
+                online_count = int(estimated_online * 0.4)  # 40% fully online
+                idle_count = int(estimated_online * 0.35)   # 35% idle
+                dnd_count = int(estimated_online * 0.25)    # 25% DND
+                offline_count = total_members - online_count - idle_count - dnd_count
+                
+                online_members = online_count + idle_count + dnd_count
+            else:
+                online_members = online_count + idle_count + dnd_count
             
             # Calculate activity percentage
             activity_percentage = (online_members / total_members * 100) if total_members > 0 else 0
@@ -378,15 +420,21 @@ class TicketCommands(commands.Cog):
                 inline=False
             )
             
-            # Add member status breakdown
+            # Add member status breakdown using our calculated counts
             status_counts = {
-                "🟢 Online": len([m for m in guild.members if m.status == discord.Status.online]),
-                "🟡 Idle": len([m for m in guild.members if m.status == discord.Status.idle]),
-                "🔴 DND": len([m for m in guild.members if m.status == discord.Status.dnd]),
-                "⚫ Offline": len([m for m in guild.members if m.status == discord.Status.offline])
+                "🟢 Online": online_count,
+                "🟡 Idle": idle_count,
+                "🔴 DND": dnd_count,
+                "⚫ Offline": offline_count
             }
             
             status_text = "\n".join([f"{emoji} {count:,}" for emoji, count in status_counts.items()])
+            
+            # Add debug info about data visibility
+            if visible_members < total_members * 0.1:
+                status_text += f"\n⚠️ Estimated (visible: {visible_members}/{total_members})"
+                if voice_members > 0:
+                    status_text += f"\n🎤 Voice active: {voice_members}"
             embed.add_field(
                 name="👤 Member Status",
                 value=f"```{status_text}```",
