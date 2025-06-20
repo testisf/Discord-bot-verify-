@@ -7,6 +7,7 @@ from aiohttp import web
 from config import Config
 from commands.military import MilitaryCommands
 from commands.verification import VerificationCommands
+from commands.tickets import TicketCommands
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -31,6 +32,7 @@ class MilitaryBot(commands.Bot):
         # Add cogs
         await self.add_cog(MilitaryCommands(self))
         await self.add_cog(VerificationCommands(self))
+        await self.add_cog(TicketCommands(self))
         
         # Sync slash commands
         try:
