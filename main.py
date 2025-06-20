@@ -33,10 +33,22 @@ class MilitaryBot(commands.Bot):
         await self.add_cog(VerificationCommands(self))
         await self.add_cog(TicketCommands(self))
         
-        # Sync slash commands
+        # Sync slash commands globally and to guilds
         try:
+            # Global sync (takes up to 1 hour to propagate)
             synced = await self.tree.sync()
-            logger.info(f"Synced {len(synced)} command(s)")
+            logger.info(f"Synced {len(synced)} command(s) globally")
+            
+            # Guild-specific sync for immediate availability
+            for guild in self.guilds:
+                try:
+                    guild_synced = await self.tree.sync(guild=guild)
+                    logger.info(f"Synced {len(guild_synced)} command(s) to guild: {guild.name}")
+                except Exception as guild_error:
+                    logger.error(f"Failed to sync commands to guild {guild.name}: {guild_error}")
+                    
+            for command in synced:
+                logger.info(f"  - {command.name}: {command.description}")
         except Exception as e:
             logger.error(f"Failed to sync commands: {e}")
     
@@ -44,6 +56,14 @@ class MilitaryBot(commands.Bot):
         """Called when the bot is ready"""
         logger.info(f'{self.user} has landed on the battlefield!')
         logger.info(f'Bot is in {len(self.guilds)} servers')
+        
+        # Sync commands to all connected guilds for immediate availability
+        for guild in self.guilds:
+            try:
+                guild_synced = await self.tree.sync(guild=guild)
+                logger.info(f"Synced {len(guild_synced)} command(s) to guild: {guild.name}")
+            except Exception as guild_error:
+                logger.error(f"Failed to sync commands to guild {guild.name}: {guild_error}")
         
         # Set bot status
         activity = discord.Activity(
