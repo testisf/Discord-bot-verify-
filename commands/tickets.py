@@ -240,6 +240,31 @@ class TicketCommands(commands.Cog):
     async def cog_unload(self):
         self.update_member_count.cancel()
     
+    @app_commands.command(name="sync_commands", description="Force sync all commands to this server (Admin only)")
+    async def sync_commands(self, interaction: discord.Interaction):
+        """Force sync commands to current guild"""
+        if not isinstance(interaction.user, discord.Member) or not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message(
+                "You need Administrator permissions to use this command!",
+                ephemeral=True
+            )
+            return
+        
+        await interaction.response.defer(ephemeral=True)
+        
+        try:
+            # Sync commands to this specific guild
+            synced = await self.bot.tree.sync(guild=interaction.guild)
+            await interaction.followup.send(
+                f"Successfully synced {len(synced)} commands to this server! All commands should now be available.",
+                ephemeral=True
+            )
+        except Exception as e:
+            await interaction.followup.send(
+                f"Failed to sync commands: {str(e)}",
+                ephemeral=True
+            )
+
     @app_commands.command(name="setup_tickets", description="Setup the ticket system (Admin only)")
     async def setup_tickets(self, interaction: discord.Interaction):
         """Setup ticket system"""
